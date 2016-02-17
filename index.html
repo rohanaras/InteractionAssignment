@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+    <meta charset="UTF-8">
+    <html lang="en">
+    <head>
+        <title></title>
+    </head>
+    <style>
+
+    </style>
+    <body>
+        <script src="//d3js.org/d3.v3.min.js"></script>
+        <script type="text/javascript" src="http://d3js.org/queue.v1.min.js"></script>
+        <script>
+            'use strict';
+
+            var width = 1500;
+            var height = 900;
+            var vis = d3.select("body").append("svg")
+                    .attr("width", width).attr("height", height);
+
+            queue().defer(d3.csv, "2015_trip_data.csv")
+                    .defer(d3.json, "city-limits.geojson")
+                    .await(ready);
+
+            function ready(error, tripData, geojson) {
+                var center = d3.geo.centroid(geojson);
+
+                console.log(geojson);
+
+                var scale = 200000;
+                var offset = [1100, 600];
+
+                // new projection
+                var projection = d3.geo.mercator().center(center)
+                        .scale(scale).translate(offset).rotate([0,0,0]);
+
+                var path = d3.geo.path().projection(projection);
+
+                vis.selectAll("path").data(geojson.features).enter().append("path")
+                        .attr("d", path)
+                        .style("stroke-width", "1")
+                        .style("fill", 'white')
+                        .style("stroke", "black");
+
+                //paths
+                var links = [];
+                for(var i=0, len=tripData.length-1; i<len; i++){
+                    // (note: loop until length - 1 since we're getting the next
+                    //  item with i+1)
+                    links.push({
+                        type: "LineString",
+                        coordinates: [
+                            [ tripData[i].startlon, tripData[i].startlat ],
+                            [ tripData[i].endlon, tripData[i].endlat ]
+                        ]
+                    });
+                }
+                console.log(links);
+
+                // Standard enter / update
+                var pathArcs = vis.selectAll(".arc")
+                        .data(links);
+
+                //enter
+                pathArcs.enter()
+                        .append("path").attr({
+                            'class': 'arc'
+                        }).style({
+                            fill: 'none'
+                        });
+
+                //update
+                pathArcs.attr({
+                    //d is the points attribute for this path, we'll draw
+                    //  an arc between the points using the arc function
+                    d: path
+                })
+                        .style({
+                            stroke: '#0000ff',
+                            'stroke-width': '2px'
+                        })
+                    // Uncomment this line to remove the transition
+                        .call(lineTransition);
+
+                //exit
+                pathArcs.exit().remove();
+
+            }
+
+            function lineTransition(path) {
+                path.transition()
+                    //NOTE: Change this number (in ms) to make lines draw faster or slower
+                        .duration(5500)
+                        .each("end", function(d,i) {
+                            ////Uncomment following line to re-transition
+                            //d3.select(this).call(transition);
+
+                            //We might want to do stuff when the line reaches the target,
+                            //  like start the pulsating or add a new point or tell the
+                            //  NSA to listen to this guy's phone calls
+                            //doStuffWhenLineFinishes(d,i);
+                        });
+            }
+
+            function filterSubscription() { }
+
+
+        </script>
+    </body>
+</html>
