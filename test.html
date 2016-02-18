@@ -9,7 +9,7 @@
 <nav>
     <ul>
         <li>
-            <p id="hour">3</p>
+            <p id="time"></p>
         </li>
         <li>
             <input name="decrementButton"
@@ -92,12 +92,14 @@
 
             var wait = (links[0].timestamps.start - earliest) / 1000000;
             var duration = (links[0].timestamps.end - links[0].timestamps.start) / 500;
-            drawTrips(projection, trips.append('g'), links[0], 0, duration);
-//            for (var idx = 1; idx < 10000; idx++) {
-//                wait = (links[idx].timestamps.start - earliest) / 1000000;
-//                duration = (links[idx].timestamps.end - links[idx].timestamps.start) / 500;
-//                drawTrips(projection, trips.append('g'),links[idx], wait, duration);
-//            }
+            drawTrips(projection, trips.append('g'), links[0], wait, duration);
+            for (var idx = 1; idx < 10000; idx++) {
+                wait = (links[idx].timestamps.start - earliest) / 1000000;
+                console.log(links[idx].timestamps.start);
+                console.log(wait);
+                duration = (links[idx].timestamps.end - links[idx].timestamps.start) / 500;
+                drawTrips(projection, trips.append('g'),links[idx], wait, duration);
+            }
         });
     });
 
@@ -127,6 +129,10 @@
                 .duration(duration)
                 .ease("linear")
                 .attr("stroke-dashoffset", 0)
+                .call(function() {
+                    //console.log(wait);
+                    d3.select('#time').text(wait)
+                })
                 // change color
                 .transition()
                 .duration(100)
