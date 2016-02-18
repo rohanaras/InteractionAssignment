@@ -14,6 +14,8 @@
 <script>
     'use strict';
 
+    // add ability (force user?) to subset by month
+
     var width = 1500;
     var height = 900;
     var vis = d3.select("body").append("svg")
@@ -43,72 +45,76 @@
             for(var i=0, len=tripData.length-1; i<len; i++){
                 // (note: loop until length - 1 since we're getting the next
                 //  item with i+1)
+
                 links.push({
                     coordinates: [
                         { lon: tripData[i].startlon, lat: tripData[i].startlat},
                         { lon: tripData[i].endlon, lat: tripData[i].endlat }
-                    ]
+                    ],
+                    timestamps: {start: new Date(tripData[i].starttime), end: new Date(tripData[i].stoptime)},
+                    demographics: {
+                        member: tripData[i].usertype === 'Annual Member',
+                        gender: tripData[i].gender,
+                        birthYear: tripData[i].birthyear
+                    }
                 });
             }
-            
-            var line = d3.svg.line()
-                    .x(function (d) {
-                        return projection([d.lon,])[0]
-                    })
-                    .y(function (d) {
-                        return projection([, d.lat])[1]
-                    })
-                    .interpolate("linear");
 
-            var tripPath = trips.append("path")
-                    .attr("d", line(links[0].coordinates))
-                    .attr("stroke", "steelblue")
-                    .attr("stroke-width", "2")
-                    .attr("fill", "none");
+            var earliest = links[0].timestamps.start;
+            links.forEach(function(link) {
+                if (link.timestamps.start < earliest) {
+                    earliest = link.timestamps.start
+                }
+            });
 
-            var tripLength = tripPath.node().getTotalLength();
-
-            //fade in
-            tripPath.attr("stroke-dasharray", tripLength + " " + tripLength)
-                    .attr("stroke-dashoffset", -tripLength) // - to correct direction
-                    .transition()
-                    .duration(2000)
-                    .ease("linear")
-                    .attr("stroke-dashoffset", 0)
-                    // fade away
-                    .transition()
-                    .duration(2000)
-                    .ease("linear")
-                    .attr("stroke-dashoffset", tripLength);
-
+            var wait = (links[0].timestamps.start - earliest) / 1000000;
+            var duration = (links[0].timestamps.end - links[0].timestamps.start) / 500;
+            drawTrips(projection, trips.append('g'), links[0], wait, duration);
+            for (var idx = 1; idx < 10000; idx++) {
+                wait = (links[idx].timestamps.start - earliest) / 1000000;
+                duration = (links[idx].timestamps.end - links[idx].timestamps.start) / 500;
+                drawTrips(projection, trips.append('g'),links[idx], wait, duration);
+            }
         });
     });
 
-    var lineTransition = function lineTransition(path) {
-        path.transition()
-                //NOTE: Change this number (in ms) to make lines draw faster or slower
-                .duration(5500)
-                .attrTween("stroke-dasharray", tweenDash)
-                .each("end", function(d,i) {
-                    ////Uncomment following line to re-transition
-                    //d3.select(this).call(transition);
+    function drawTrips(projection, layer, link, wait, duration) {
+        var line = d3.svg.line()
+                .x(function (d) {
+                    return projection([d.lon,])[0]
+                })
+                .y(function (d) {
+                    return projection([, d.lat])[1]
+                })
+                .interpolate("linear");
 
-                    //We might want to do stuff when the line reaches the target,
-                    //  like start the pulsating or add a new point or tell the
-                    //  NSA to listen to this guy's phone calls
-                    //doStuffWhenLineFinishes(d,i);
-                });
-    };
-    var tweenDash = function tweenDash() {
-        //This function is used to animate the dash-array property, which is a
-        //  nice hack that gives us animation along some arbitrary path (in this
-        //  case, makes it look like a line is being drawn from point A to B)
-        var len = this.getTotalLength(),
-                interpolate = d3.interpolateString("0," + len, len + "," + len);
+        var tripPath = layer.append("path")
+                .attr("d", line(link.coordinates))
+                .attr("stroke", "steelblue")
+                .attr("stroke-width", "2")
+                .attr("fill", "none");
 
-        return function(t) { return interpolate(t); };
-    };
+        var tripLength = tripPath.node().getTotalLength();
 
+        //fade in
+        tripPath.attr("stroke-dasharray", tripLength + " " + tripLength)
+                .attr("stroke-dashoffset", -tripLength) // - to correct direction
+                .transition()
+                .delay(wait)
+                .duration(duration)
+                .ease("linear")
+                .attr("stroke-dashoffset", 0)
+                // fade away
+                .transition()
+                .duration(duration)
+                .ease("linear")
+                .attr("stroke-dashoffset", tripLength)
+                .remove();
+    }
+
+    function changeMonth() {
+
+    }
 
     function filterSubscription() { }
 
