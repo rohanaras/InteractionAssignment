@@ -1,13 +1,36 @@
 <!DOCTYPE html>
-<meta charset="UTF-8">
 <html lang="en">
 <head>
     <title></title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/main.css"/>
 </head>
-<style>
-
-</style>
 <body>
+<nav>
+    <ul>
+        <li>
+            <p id="hour">3</p>
+        </li>
+        <li>
+            <input name="decrementButton"
+                   type="button"
+                   value="Decrement Hour"
+                   class="btn btn-default"
+                   onclick="decrementHour()" />
+        </li>
+        <li>
+            <input name="incrementButton"
+                   type="button"
+                   value="Increment Hour"
+                   class="btn btn-default"
+                   onclick="incrementHour()" />
+        </li>
+        <li>
+            <a href="index.html">Back to explanation</a>
+        </li>
+    </ul>
+</nav>
+
 <script src="//d3js.org/d3.v3.min.js"></script>
 <script type="text/javascript" src="http://d3js.org/queue.v1.min.js"></script>
 <script src="http://d3js.org/topojson.v1.min.js"></script>
@@ -69,12 +92,12 @@
 
             var wait = (links[0].timestamps.start - earliest) / 1000000;
             var duration = (links[0].timestamps.end - links[0].timestamps.start) / 500;
-            drawTrips(projection, trips.append('g'), links[0], wait, duration);
-            for (var idx = 1; idx < 10000; idx++) {
-                wait = (links[idx].timestamps.start - earliest) / 1000000;
-                duration = (links[idx].timestamps.end - links[idx].timestamps.start) / 500;
-                drawTrips(projection, trips.append('g'),links[idx], wait, duration);
-            }
+            drawTrips(projection, trips.append('g'), links[0], 0, duration);
+//            for (var idx = 1; idx < 10000; idx++) {
+//                wait = (links[idx].timestamps.start - earliest) / 1000000;
+//                duration = (links[idx].timestamps.end - links[idx].timestamps.start) / 500;
+//                drawTrips(projection, trips.append('g'),links[idx], wait, duration);
+//            }
         });
     });
 
@@ -91,7 +114,7 @@
         var tripPath = layer.append("path")
                 .attr("d", line(link.coordinates))
                 .attr("stroke", "steelblue")
-                .attr("stroke-width", "2")
+                .attr("stroke-width", "1")
                 .attr("fill", "none");
 
         var tripLength = tripPath.node().getTotalLength();
@@ -104,9 +127,13 @@
                 .duration(duration)
                 .ease("linear")
                 .attr("stroke-dashoffset", 0)
+                // change color
+                .transition()
+                .duration(100)
+                .attr("stroke", 'lightblue')
                 // fade away
                 .transition()
-                .duration(duration)
+                .duration(duration / 2)
                 .ease("linear")
                 .attr("stroke-dashoffset", tripLength)
                 .remove();

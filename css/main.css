@@ -1,0 +1,54 @@
+/* import the bootstrap css framework */
+@import url(https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css);
+
+/* import Lato from google fonts */
+@import url(https://fonts.googleapis.com/css?family=Lato:400,300,300italic);
+
+nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1;
+    color: #FFF;
+    background-color: rgba(24, 28, 34, 0.8);
+    font-size: 16px;
+    text-transform: lowercase;
+    font-variant: small-caps;
+}
+
+nav li {
+    display: inline-block;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    padding-top: 0.5em;
+    padding-bottom: 0;
+}
+
+nav a, nav a:visited {
+    color: #FFF;
+    text-decoration: none;
+}
+
+nav a:hover {
+    color: #D87E28;
+    text-decoration: none;
+}
+
+svg {
+    margin-top: 2em;
+}
+
+body {
+    font-family: Lato, 'Helvetica Neue', Helvetica, sans-serif;
+    font-size: 20px;
+    font-weight: 300;
+}
+
+.container {
+    max-width: 500px;
+}
+
+#link {
+    text-align: center;
+}
