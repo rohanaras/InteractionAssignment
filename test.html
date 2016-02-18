@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<html lang="en">
+<head>
+    <title></title>
+</head>
+<style>
+
+</style>
+<body>
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script type="text/javascript" src="http://d3js.org/queue.v1.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<script>
+    'use strict';
+
+    var width = 1500;
+    var height = 900;
+    var vis = d3.select("body").append("svg")
+            .attr("width", width).attr("height", height);
+
+    var city = vis.append('g');
+    var trips = vis.append('g');
+
+    d3.json("city-limits.geojson", function(error, outline) {
+        var center = d3.geo.centroid(outline);
+        var scale = 200000;
+        var offset = [1100, 600];
+
+        // new projection
+        var projection = d3.geo.mercator().center(center)
+                .scale(scale).translate(offset).rotate([0,0,0]);
+
+        var path = d3.geo.path().projection(projection);
+
+        city.selectAll("path").data(outline.features).enter().append("path")
+                .attr("d", path)
+                .style("stroke-width", "1")
+                .style("fill", 'white')
+                .style("stroke", "black");
+        d3.csv("2015_trip_data.csv", function(error, tripData) {
+            var links = [];
+            for(var i=0, len=tripData.length-1; i<len; i++){
+                // (note: loop until length - 1 since we're getting the next
+                //  item with i+1)
+                links.push({
+                    coordinates: [
+                        { lon: tripData[i].startlon, lat: tripData[i].startlat},
+                        { lon: tripData[i].endlon, lat: tripData[i].endlat }
+                    ]
+                });
+            }
+            
+            var line = d3.svg.line()
+                    .x(function (d) {
+                        return projection([d.lon,])[0]
+                    })
+                    .y(function (d) {
+                        return projection([, d.lat])[1]
+                    })
+                    .interpolate("linear");
+
+            var tripPath = trips.append("path")
+                    .attr("d", line(links[0].coordinates))
+                    .attr("stroke", "steelblue")
+                    .attr("stroke-width", "2")
+                    .attr("fill", "none");
+
+            var tripLength = tripPath.node().getTotalLength();
+
+            //fade in
+            tripPath.attr("stroke-dasharray", tripLength + " " + tripLength)
+                    .attr("stroke-dashoffset", -tripLength) // - to correct direction
+                    .transition()
+                    .duration(2000)
+                    .ease("linear")
+                    .attr("stroke-dashoffset", 0)
+                    // fade away
+                    .transition()
+                    .duration(2000)
+                    .ease("linear")
+                    .attr("stroke-dashoffset", tripLength);
+
+        });
+    });
+
+    var lineTransition = function lineTransition(path) {
+        path.transition()
+                //NOTE: Change this number (in ms) to make lines draw faster or slower
+                .duration(5500)
+                .attrTween("stroke-dasharray", tweenDash)
+                .each("end", function(d,i) {
+                    ////Uncomment following line to re-transition
+                    //d3.select(this).call(transition);
+
+                    //We might want to do stuff when the line reaches the target,
+                    //  like start the pulsating or add a new point or tell the
+                    //  NSA to listen to this guy's phone calls
+                    //doStuffWhenLineFinishes(d,i);
+                });
+    };
+    var tweenDash = function tweenDash() {
+        //This function is used to animate the dash-array property, which is a
+        //  nice hack that gives us animation along some arbitrary path (in this
+        //  case, makes it look like a line is being drawn from point A to B)
+        var len = this.getTotalLength(),
+                interpolate = d3.interpolateString("0," + len, len + "," + len);
+
+        return function(t) { return interpolate(t); };
+    };
+
+
+    function filterSubscription() { }
+
+
+</script>
+</body>
+</html>
