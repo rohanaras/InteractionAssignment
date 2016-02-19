@@ -102,7 +102,9 @@
                 })
                 .interpolate("linear");
 
-        var tripPath = layer.append("path")
+        var tripPath = layer.selectAll("path")
+                .data([link]).enter().append("path")
+                .call(function(d) { console.log(d) })
                 .attr("d", line(link.coordinates))
                 .attr("stroke", "steelblue")
                 .attr("stroke-width", "1")
