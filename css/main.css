@@ -36,6 +36,8 @@ nav a:hover {
 }
 
 svg {
+    display: block;
+    margin: auto;
     margin-top: 2em;
 }
 
@@ -51,4 +53,8 @@ body {
 
 #link {
     text-align: center;
+}
+
+.form-inline input {
+    color: #000;
 }

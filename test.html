@@ -12,21 +12,16 @@
             <p id="time"></p>
         </li>
         <li>
-            <input name="decrementButton"
-                   type="button"
-                   value="Decrement Hour"
-                   class="btn btn-default"
-                   onclick="decrementHour()" />
+            <form id="trail-form" class='form-inline' action="#" onsubmit="return makeVisible(this)">
+                <label for="start">Start Date</label>
+                <input id="start" type="date">
+                <label for="end">End Date</label>
+                <input id="end" type="date">
+                <input type="submit" class="btn btn-default">
+            </form>
         </li>
         <li>
-            <input name="incrementButton"
-                   type="button"
-                   value="Increment Hour"
-                   class="btn btn-default"
-                   onclick="incrementHour()" />
-        </li>
-        <li>
-            <a href="index.html">Back to explanation</a>
+            <!--put stuff here-->
         </li>
     </ul>
 </nav>
@@ -39,18 +34,20 @@
 
     // add ability (force user?) to subset by month
 
-    var width = 1500;
-    var height = 900;
+    var width = 800;
+    var height = 600;
     var vis = d3.select("body").append("svg")
             .attr("width", width).attr("height", height);
 
     var city = vis.append('g');
     var trips = vis.append('g');
 
+    var scaleTime = 1000;
+
     d3.json("city-limits.geojson", function(error, outline) {
         var center = d3.geo.centroid(outline);
         var scale = 200000;
-        var offset = [1100, 600];
+        var offset = [670, 410];
 
         // new projection
         var projection = d3.geo.mercator().center(center)
@@ -65,10 +62,7 @@
                 .style("stroke", "black");
         d3.csv("2015_trip_data.csv", function(error, tripData) {
             var links = [];
-            for(var i=0, len=tripData.length-1; i<len; i++){
-                // (note: loop until length - 1 since we're getting the next
-                //  item with i+1)
-
+            for(var i = 0; i < tripData.length; i++){
                 links.push({
                     coordinates: [
                         { lon: tripData[i].startlon, lat: tripData[i].startlat},
@@ -83,23 +77,18 @@
                 });
             }
 
-            var earliest = links[0].timestamps.start;
-            links.forEach(function(link) {
-                if (link.timestamps.start < earliest) {
-                    earliest = link.timestamps.start
-                }
-            });
+            links = links.slice(0, 1000);
 
-            var wait = (links[0].timestamps.start - earliest) / 1000000;
-            var duration = (links[0].timestamps.end - links[0].timestamps.start) / 500;
-            drawTrips(projection, trips.append('g'), links[0], wait, duration);
-            for (var idx = 1; idx < 10000; idx++) {
-                wait = (links[idx].timestamps.start - earliest) / 1000000;
-                console.log(links[idx].timestamps.start);
+            var earliest = links[0].timestamps.start; //data is sorted
+            var last = links[links.length - 1].timestamps.end;
+
+            for (var idx = 0; idx < links.length; idx++) {
+                var wait = (links[idx].timestamps.start - earliest) / scaleTime;
                 console.log(wait);
-                duration = (links[idx].timestamps.end - links[idx].timestamps.start) / 500;
+                var duration = (links[idx].timestamps.end - links[idx].timestamps.start) / scaleTime;
                 drawTrips(projection, trips.append('g'),links[idx], wait, duration);
             }
+            clock(earliest, last);
         });
     });
 
@@ -117,37 +106,63 @@
                 .attr("d", line(link.coordinates))
                 .attr("stroke", "steelblue")
                 .attr("stroke-width", "1")
-                .attr("fill", "none");
+                .attr("fill", "none")
+                .attr("class", link.timestamps);
 
         var tripLength = tripPath.node().getTotalLength();
 
         //fade in
         tripPath.attr("stroke-dasharray", tripLength + " " + tripLength)
                 .attr("stroke-dashoffset", -tripLength) // - to correct direction
+                .attr('class', 'trail')
                 .transition()
                 .delay(wait)
                 .duration(duration)
                 .ease("linear")
                 .attr("stroke-dashoffset", 0)
-                .call(function() {
-                    //console.log(wait);
-                    d3.select('#time').text(wait)
-                })
                 // change color
                 .transition()
-                .duration(100)
                 .attr("stroke", 'lightblue')
                 // fade away
                 .transition()
-                .duration(duration / 2)
-                .ease("linear")
-                .attr("stroke-dashoffset", tripLength)
-                .remove();
+                .duration(10)
+                .style('opacity', 0);
+                // erase
+//                .transition()
+//                .duration(duration * 4)
+//                .ease("linear")
+//                .attr("stroke-dashoffset", tripLength)
+//                .remove();
     }
 
-    function changeMonth() {
+    function clock(start, end) {
+        var date = start;
+        setInterval(function() {
+            if (date <= end) {
+                d3.select('#time').text(date);
+                date.setTime(date.getTime() + 100 * scaleTime);
+            }
+        }, 100);
+    }
+
+    d3.select('#trail-form').on('submit', function() {});
+
+    function makeVisible(form) {
+        d3.selectAll('.trail')
+                .call(function(d) {
+                    console.log(form.end.value);
+                    console.log(d[0]);
+                    return [d[0].filter(function(el) {
+                        console.log(el);
+                        return el.timestamps.end <= form.end.value &&
+                                        el.timestamps.start >= form.start.value
+                    })]
+                })
+                .style('opacity', 100)
 
     }
+
+    function changeMonth() {}
 
     function filterSubscription() { }
 
