@@ -83,6 +83,9 @@ function drawStops(projection, layer, station) {
                 .text(d.name);
             d3.select('#stopinfo')
                 .append('p')
+                .text("Number of bike docks: " + d.dockcount);
+            d3.select('#stopinfo')
+                .append('p')
                 .text(userType + 'Departures: ' + startcount);
             d3.select('#stopinfo')
                 .append('p')
@@ -137,6 +140,8 @@ function loadTrips(projection) {
 
         var earliest = links[0].timestamps.start; //data is sorted
         var last = links[links.length - 1].timestamps.end;
+
+
 
         for (var idx = 0; idx < links.length; idx++) {
             var wait = (links[idx].timestamps.start - earliest) / scaleTime;
