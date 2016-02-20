@@ -1,7 +1,5 @@
 'use strict';
 
-// add ability (force user?) to subset by month
-
 var width = 950;
 var height = 700;
 var vis = d3.select("body").append("svg")
