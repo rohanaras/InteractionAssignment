@@ -32,7 +32,8 @@ d3.json("lib/city-limits.geojson", function(error, outline) {
         .attr("d", path)
         .style("stroke-width", "1")
         .style("fill", 'white')
-        .style("stroke", "lightgrey");
+        .style("stroke", "lightgrey")
+        //.style("fill", "lightgrey");
 
     loadDrawStops(projection);
     loadTrips(projection);
@@ -91,6 +92,24 @@ function drawStops(projection, layer, station) {
             d3.select('#stopinfo').html("");
             stop.attr('r', 4);
         });
+
+    setInterval(function() {
+        stop.style("fill", function(d) {
+            var startcount = stopCounts[d.name]['start']['onetime'] +
+                stopCounts[d.name]['start']['member'];
+            var endcount = stopCounts[d.name]['end']['onetime'] +
+                stopCounts[d.name]['end']['member'];
+
+            if (startcount == 0 && endcount == 0) {
+                return 'grey'
+            } else if (startcount > endcount) {
+                return "#abd9e9"
+            } else if (endcount > startcount) {
+                return "#fdae61"
+            }
+            return "#D8C19E"
+        })
+    }, 100)
 }
 
 // loads trip data, starts clock
@@ -99,7 +118,7 @@ function loadTrips(projection) {
         var links = [];
         for(var i = 0; i < tripData.length; i++){
             links.push({
-                onstop: tripData[i].from_station_name,
+                startstop: tripData[i].from_station_name,
                 endstop: tripData[i].to_station_name,
                 coordinates: [
                     { lon: tripData[i].startlon, lat: tripData[i].startlat},
@@ -114,7 +133,7 @@ function loadTrips(projection) {
             });
         }
 
-        links = links.slice(0, 10000);
+        links = links.slice(0, 1000);
 
         var earliest = links[0].timestamps.start; //data is sorted
         var last = links[links.length - 1].timestamps.end;
@@ -151,7 +170,7 @@ function drawTrips(projection, layer, link, wait, duration) {
 
     //fade in
     tripPath.attr("stroke-dasharray", tripLength + " " + tripLength)
-        .attr("stroke-dashoffset", -tripLength) // - to correct direction
+        .attr("stroke-dashoffset", tripLength)
         .attr('class', 'trail')
         .transition()
         .delay(wait)
@@ -162,16 +181,16 @@ function drawTrips(projection, layer, link, wait, duration) {
         //update stop counts
         .each("start", function(d) {
             if(d.demographics.member) {
-                stopCounts[d.onstop]['start']['member']++
+                stopCounts[d.startstop]['start']['member']++
             } else {
-                stopCounts[d.onstop]['start']['onetime']++
+                stopCounts[d.startstop]['start']['onetime']++
             }
         })
         .each("end", function(d) {
             if(d.demographics.member) {
-                stopCounts[d.onstop]['end']['member']++
+                stopCounts[d.endstop]['end']['member']++
             } else {
-                stopCounts[d.onstop]['end']['onetime']++
+                stopCounts[d.endstop]['end']['onetime']++
             }
         })
 
