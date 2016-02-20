@@ -4,11 +4,12 @@
 /* import Lato from google fonts */
 @import url(https://fonts.googleapis.com/css?family=Lato:400,300,300italic);
 
-nav {
+#sidebar {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
+    width: 250px;
+    height: 100%;
     z-index: 1;
     color: #FFF;
     background-color: rgba(24, 28, 34, 0.8);
@@ -17,44 +18,48 @@ nav {
     font-variant: small-caps;
 }
 
-nav li {
-    display: inline-block;
-    padding-left: 0.5em;
-    padding-right: 0.5em;
-    padding-top: 0.5em;
-    padding-bottom: 0;
+#sidebar p {
+    font-weight: 300;
 }
 
-nav a, nav a:visited {
-    color: #FFF;
-    text-decoration: none;
+#padding {
+    margin: auto;
+    width: 90%;
 }
 
-nav a:hover {
-    color: #D87E28;
-    text-decoration: none;
+#stopinfo {
+    height:6em;
+}
+
+#stopinfo h4 {
+    margin-top: 0;
+}
+
+#stopinfo p {
+    font-size: 14px;
+    font-variant: normal;
+    margin-bottom: 0;
+}
+
+#sidebar button {
+    margin: auto;
+    width: 95%;
+}
+
+
+#filterusers {
+    margin-top: 10px;
+}
+
+#memberVisibility, #onetimeVisibility {
+    visibility: hidden;
 }
 
 svg {
     display: block;
     margin: auto;
-    margin-top: 2em;
 }
 
 body {
     font-family: Lato, 'Helvetica Neue', Helvetica, sans-serif;
-    font-size: 20px;
-    font-weight: 300;
-}
-
-.container {
-    max-width: 500px;
-}
-
-#link {
-    text-align: center;
-}
-
-.form-inline input {
-    color: #000;
 }
