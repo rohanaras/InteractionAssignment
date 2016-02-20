@@ -32,8 +32,7 @@ d3.json("lib/city-limits.geojson", function(error, outline) {
         .attr("d", path)
         .style("stroke-width", "1")
         .style("fill", 'white')
-        .style("stroke", "lightgrey")
-        //.style("fill", "lightgrey");
+        .style("stroke", "lightgrey");
 
     loadDrawStops(projection);
     loadTrips(projection);
