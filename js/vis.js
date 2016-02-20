@@ -107,11 +107,11 @@ function drawStops(projection, layer, station) {
             if (startcount == 0 && endcount == 0) {
                 return 'grey'
             } else if (startcount > endcount) {
-                return "#abd9e9"
+                return "#91cf60"
             } else if (endcount > startcount) {
-                return "#fdae61"
+                return "#fc8d59"
             }
-            return "#D8C19E"
+            return "#C6AE5C"
         })
     }, 100)
 }
