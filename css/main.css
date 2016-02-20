@@ -27,6 +27,35 @@
     width: 90%;
 }
 
+ul {
+    padding-left: 30px;
+}
+
+li span {
+    color: white;
+    font-size: 16px;
+}
+
+li {
+    font-size: 20px;
+}
+
+#arrivalsBullet {
+    color: #fdae61;
+}
+
+#departuresBullet {
+    color: #abd9e9
+}
+
+#equalBullet {
+    color: #D8C19E;
+}
+
+#noneBullet {
+    color: grey;
+}
+
 #stopinfo {
     height:8em;
 }

@@ -17,6 +17,7 @@ var scaleTime = 1000;
 var stopCounts = {};
 var userType = '';
 
+
 d3.json("lib/city-limits.geojson", function(error, outline) {
     var center = d3.geo.centroid(outline);
     var scale = 270000;
@@ -52,6 +53,7 @@ function loadDrawStops(projection) {
 }
 
 function drawStops(projection, layer, station) {
+
     var stop = layer.selectAll('circle')
         .data([station]).enter()
         .append('circle')
@@ -232,8 +234,10 @@ d3.select('#allVisibility').on('click', function() {
     } else {
         //button configuration
         d3.select(this).text('Show Trails up to Now');
-        d3.select('#memberVisibility').style('visibility', 'hidden');
-        d3.select('#onetimeVisibility').style('visibility', 'hidden');
+        d3.select('#memberVisibility')
+            .style('visibility', 'hidden').text('Hide Member Trips');
+        d3.select('#onetimeVisibility')
+            .style('visibility', 'hidden').text('Hide One Time Trips');
 
         //stopinfo reset
         userType = '';
